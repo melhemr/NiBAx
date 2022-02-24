@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as pat
 import numpy as np
 import pandas as pd
+import re
 from NiBAx.core.plotcanvas import PlotCanvas
 from NiBAx.core.baseplugin import BasePlugin
 from NiBAx.core.gui.SearchableQComboBox import SearchableQComboBox
@@ -101,13 +102,9 @@ class Harmonization(QtWidgets.QWidget,BasePlugin):
         self.ui.stackedWidget.setCurrentIndex(0) 
 
     def PopulateROI(self):
-        #get data column header names
-        datakeys = self.datamodel.GetColumnHeaderNames()
-        #construct ROI list to populate comboBox
-        roiList = (  [x for x in datakeys if x.startswith('MUSE_Volume')])
-        
+        MUSEDictDataFrame = self.datamodel.GetMUSEDictDataFrame()
         _, MUSEDictIDtoNAME = self.datamodel.GetMUSEDictionaries()
-        roiList = list(set(roiList).intersection(set(datakeys)))
+        roiList = list(set(self.datamodel.GetColumnHeaderNames()).intersection(set(MUSEDictDataFrame[MUSEDictDataFrame['ROI_LEVEL']=='SINGLE']['ROI_COL'])))
         roiList.sort()
         roiList = ['(MUSE) ' + list(map(MUSEDictIDtoNAME.get, [k]))[0] if k.startswith('MUSE_') else k for k in roiList]
 
@@ -131,15 +128,22 @@ class Harmonization(QtWidgets.QWidget,BasePlugin):
         currentROI = self.ui.comboBoxROI.currentText()
 
         # Translate ROI name back to ROI ID
+        AllItems = [self.ui.comboBoxROI.itemText(i) for i in range(self.ui.comboBoxROI.count())]
+        MUSEDictNAMEtoID, _ = self.datamodel.GetMUSEDictionaries()
         try:
-            MUSEDictNAMEtoID, _ = self.datamodel.GetMUSEDictionaries()
-            if currentROI.startswith('(MUSE)'):
+            if currentROI in AllItems:
                 currentROI = list(map(MUSEDictNAMEtoID.get, [currentROI[7:]]))[0]
+            elif currentROI not in AllItems:
+                currentROI = 'MUSE_Volume_100'
+                currentROI = list(map(MUSEDictNAMEtoID.get, [currentROI[7:]]))[0]
+                self.ui.comboBoxROI.setCurrentText('(MUSE) Right ACgG  anterior cingulate gyrus')
+                print("Invalid input. Setting to `Right Anterior Cingulate gyrus`.")
         except:
             currentROI = 'DLICV'
             self.ui.comboBoxROI.setCurrentText('DLICV')
             print("Could not translate combo box item. Setting to `DLICV`.")
 
+        print(currentROI)
         #create empty dictionary of plot options
         plotOptions = dict()
 
@@ -292,7 +296,12 @@ class Harmonization(QtWidgets.QWidget,BasePlugin):
 
     def OnAddToDataFrame(self):
         print('Saving modified data to pickle file...')
-        H_ROIs = ['H_'+x for x in self.datamodel.harmonization_model['ROIs']]
+        MUSEDictDataFrame= self.datamodel.GetMUSEDictDataFrame()
+        Derived_numbers = list(MUSEDictDataFrame[MUSEDictDataFrame['ROI_LEVEL']=='DERIVED']['ROI_INDEX'])
+        Derived_MUSE_Volumes = list('MUSE_Volume_' + str(x) for x in Derived_numbers)
+        ROI_list = list(self.datamodel.harmonization_model['ROIs']) + Derived_MUSE_Volumes
+        ROI_list.remove('MUSE_Volume_702')
+        H_ROIs = list('H_' + str(x) for x in ROI_list)
         ROIs_ICV_Sex_Residuals = ['RES_ICV_Sex_' + x for x in self.datamodel.harmonization_model['ROIs']]
         ROIs_Residuals = ['RES_' + x for x in self.datamodel.harmonization_model['ROIs']]
         RAW_Residuals = ['RAW_RES_' + x for x in self.datamodel.harmonization_model['ROIs']]
@@ -354,9 +363,9 @@ class Harmonization(QtWidgets.QWidget,BasePlugin):
                     continue
 
                 print('Harmonizing '+ site)           
-                gamma_hat_site = np.mean(((Raw_ROIs_Residuals[new_site_is_train,:])/np.dot(np.sqrt(var_pooled),np.ones((1,Raw_ROIs_Residuals[new_site_is_train,:].shape[0]))).T),0)
+                gamma_hat_site = np.nanmean(((Raw_ROIs_Residuals[new_site_is_train,:])/np.dot(np.sqrt(var_pooled),np.ones((1,Raw_ROIs_Residuals[new_site_is_train,:].shape[0]))).T),0)
                 gamma_hat_site = gamma_hat_site[:,np.newaxis]
-                delta_hat_site = pow(np.std(((Raw_ROIs_Residuals[new_site_is_train,:])/np.dot(np.sqrt(var_pooled),np.ones((1,Raw_ROIs_Residuals[new_site_is_train,:].shape[0]))).T),0),2)
+                delta_hat_site = pow(np.nanstd(((Raw_ROIs_Residuals[new_site_is_train,:])/np.dot(np.sqrt(var_pooled),np.ones((1,Raw_ROIs_Residuals[new_site_is_train,:].shape[0]))).T),0),2)
                 delta_hat_site = delta_hat_site[:,np.newaxis]
 
                 site_gamma = pd.DataFrame(gamma_hat_site.T,columns=gamma_ROIs,index=[site])
@@ -378,8 +387,19 @@ class Harmonization(QtWidgets.QWidget,BasePlugin):
 
         if 'isTrainMUSEHarmonization' in self.datamodel.data.columns:
             muse = pd.concat([self.datamodel.data['isTrainMUSEHarmonization'].copy(), covars, pd.DataFrame(bayes_data, columns=['H_' + s for s in self.datamodel.harmonization_model['ROIs']])],axis=1)
+        if 'UseForComBatGAMHarmonization' in self.datamodel.data.columns:
+            muse = pd.concat([self.datamodel.data['UseForComBatGAMHarmonization'].copy(), covars, pd.DataFrame(bayes_data, columns=['H_' + s for s in self.datamodel.harmonization_model['ROIs']])],axis=1)
         else:
             muse = pd.concat([covars,pd.DataFrame(bayes_data, columns=['H_' + s for s in self.datamodel.harmonization_model['ROIs']])],axis=1)
+        
+        # harmonize derived volumes 
+        MUSEDictDataFrame= self.datamodel.GetMUSEDictDataFrame()
+        muse_mappings = self.datamodel.GetDerivedMUSEMap()
+        for ROI in MUSEDictDataFrame[MUSEDictDataFrame['ROI_LEVEL']=='DERIVED']['ROI_INDEX']:
+            single_ROIs = muse_mappings.loc[ROI].replace('NaN',np.nan).dropna().astype(np.float)
+            single_ROIs = ['H_MUSE_Volume_%0d' % x for x in single_ROIs]
+            muse['H_MUSE_Volume_%d' % ROI] = muse[single_ROIs].sum(axis=1,skipna=False)
+        muse.drop(columns=['H_MUSE_Volume_702'], inplace=True)
 
         start_index = len(self.datamodel.harmonization_model['SITE_labels'])
         sex_icv_effect = np.dot(muse[['Sex','DLICV_baseline']].copy(), self.datamodel.harmonization_model['B_hat'][start_index:(start_index+2),:])
