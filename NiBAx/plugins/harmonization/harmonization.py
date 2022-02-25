@@ -130,20 +130,18 @@ class Harmonization(QtWidgets.QWidget,BasePlugin):
         # Translate ROI name back to ROI ID
         AllItems = [self.ui.comboBoxROI.itemText(i) for i in range(self.ui.comboBoxROI.count())]
         MUSEDictNAMEtoID, _ = self.datamodel.GetMUSEDictionaries()
-        try:
-            if currentROI in AllItems:
-                currentROI = list(map(MUSEDictNAMEtoID.get, [currentROI[7:]]))[0]
-            elif currentROI not in AllItems:
-                currentROI = 'MUSE_Volume_100'
-                currentROI = list(map(MUSEDictNAMEtoID.get, [currentROI[7:]]))[0]
-                self.ui.comboBoxROI.setCurrentText('(MUSE) Right ACgG  anterior cingulate gyrus')
-                print("Invalid input. Setting to `Right Anterior Cingulate gyrus`.")
-        except:
-            currentROI = 'DLICV'
-            self.ui.comboBoxROI.setCurrentText('DLICV')
-            print("Could not translate combo box item. Setting to `DLICV`.")
 
-        print(currentROI)
+        if currentROI not in AllItems[:-1]:
+            self.ui.comboBoxROI.blockSignals(True)
+            self.ui.comboBoxROI.clear()
+            self.ui.comboBoxROI.blockSignals(False)
+            self.ui.comboBoxROI.addItems(AllItems[:-1])
+            currentROI = self.ui.comboBoxROI.itemText(0)
+            self.ui.comboBoxROI.setCurrentText(currentROI)
+            print("Invalid input. Setting to %s." % (currentROI))
+        
+        currentROI = list(map(MUSEDictNAMEtoID.get, [currentROI[7:]]))[0]
+
         #create empty dictionary of plot options
         plotOptions = dict()
 
