@@ -1,0 +1,76 @@
+:py:mod:`NiBAx.plugins.computeSPAREs.computeSPAREs`
+===================================================
+
+.. py:module:: NiBAx.plugins.computeSPAREs.computeSPAREs
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   NiBAx.plugins.computeSPAREs.computeSPAREs.computeSPAREs
+   NiBAx.plugins.computeSPAREs.computeSPAREs.BrainAgeWorker
+
+
+
+
+.. py:class:: computeSPAREs
+
+   Bases: :py:obj:`PyQt5.QtWidgets.QWidget`, :py:obj:`NiBAx.core.baseplugin.BasePlugin`
+
+   .. py:method:: getUI()
+
+
+   .. py:method:: SetupConnections()
+
+
+   .. py:method:: updateProgress(txt, vl)
+
+
+   .. py:method:: OnLoadSPAREModel()
+
+
+   .. py:method:: OnComputationDone(y_hat)
+
+
+   .. py:method:: OnComputeSPAREs(checked)
+
+
+   .. py:method:: PopulateHue()
+
+
+   .. py:method:: plotSPAREs(useExistingSPAREs=True)
+
+
+   .. py:method:: OnAddToDataFrame()
+
+
+   .. py:method:: OnShowSPAREs()
+
+
+   .. py:method:: OnDataChanged()
+
+
+
+.. py:class:: BrainAgeWorker(data, model)
+
+   Bases: :py:obj:`PyQt5.QtCore.QObject`
+
+   .. py:attribute:: done
+      
+
+      
+
+   .. py:attribute:: progress
+      
+
+      
+
+   .. py:method:: run()
+
+
+

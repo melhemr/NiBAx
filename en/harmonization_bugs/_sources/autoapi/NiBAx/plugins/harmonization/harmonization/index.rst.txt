@@ -1,0 +1,68 @@
+:py:mod:`NiBAx.plugins.harmonization.harmonization`
+===================================================
+
+.. py:module:: NiBAx.plugins.harmonization.harmonization
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   NiBAx.plugins.harmonization.harmonization.Harmonization
+
+
+
+Functions
+~~~~~~~~~
+
+.. autoapisummary::
+
+   NiBAx.plugins.harmonization.harmonization.wrap_by_word
+
+
+
+.. py:class:: Harmonization
+
+   Bases: :py:obj:`PyQt5.QtWidgets.QWidget`, :py:obj:`NiBAx.core.baseplugin.BasePlugin`
+
+   .. py:method:: getUI()
+
+
+   .. py:method:: SetupConnections()
+
+
+   .. py:method:: OnLoadHarmonizationModelBtnClicked()
+
+
+   .. py:method:: PopulateROI()
+
+
+   .. py:method:: OnShowDataBtnClicked()
+
+
+   .. py:method:: OnApplyModelToDatasetBtnClicked()
+
+
+   .. py:method:: UpdatePlot()
+
+
+   .. py:method:: plotMUSE(plotOptions)
+
+
+   .. py:method:: OnAddToDataFrame()
+
+
+   .. py:method:: OnDataChanged()
+
+
+   .. py:method:: DoHarmonization()
+
+
+
+.. py:function:: wrap_by_word(s, n)
+
+

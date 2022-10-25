@@ -1,0 +1,47 @@
+:py:mod:`NiBAx.plugins.agetrends.agetrends`
+===========================================
+
+.. py:module:: NiBAx.plugins.agetrends.agetrends
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   NiBAx.plugins.agetrends.agetrends.AgeTrends
+
+
+
+
+.. py:class:: AgeTrends
+
+   Bases: :py:obj:`PyQt5.QtWidgets.QWidget`, :py:obj:`NiBAx.core.baseplugin.BasePlugin`
+
+   .. py:method:: getUI()
+
+
+   .. py:method:: SetupConnections()
+
+
+   .. py:method:: OnDataChanged()
+
+
+   .. py:method:: PopulateROI()
+
+
+   .. py:method:: PopulateHue()
+
+
+   .. py:method:: UpdatePlot()
+
+
+   .. py:method:: PlotAgeTrends(plotOptions)
+
+      Plot Age Trends
+
+
+

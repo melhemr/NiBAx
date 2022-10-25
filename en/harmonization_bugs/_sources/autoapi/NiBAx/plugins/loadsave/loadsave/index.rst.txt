@@ -1,0 +1,76 @@
+:py:mod:`NiBAx.plugins.loadsave.loadsave`
+=========================================
+
+.. py:module:: NiBAx.plugins.loadsave.loadsave
+
+
+Module Contents
+---------------
+
+Classes
+~~~~~~~
+
+.. autoapisummary::
+
+   NiBAx.plugins.loadsave.loadsave.PandasModel
+   NiBAx.plugins.loadsave.loadsave.LoadSave
+
+
+
+
+Attributes
+~~~~~~~~~~
+
+.. autoapisummary::
+
+   NiBAx.plugins.loadsave.loadsave.logger
+
+
+.. py:data:: logger
+   
+
+   
+
+.. py:class:: PandasModel(data, parent=None)
+
+   Bases: :py:obj:`PyQt5.QtCore.QAbstractTableModel`
+
+   .. py:method:: rowCount(parent=None)
+
+
+   .. py:method:: columnCount(parent=None)
+
+
+   .. py:method:: headerData(section, orientation, role=QtCore.Qt.DisplayRole)
+
+
+   .. py:method:: data(index, role=QtCore.Qt.DisplayRole)
+
+
+
+.. py:class:: LoadSave
+
+   Bases: :py:obj:`PyQt5.QtWidgets.QWidget`, :py:obj:`NiBAx.core.baseplugin.BasePlugin`
+
+   .. py:method:: SetupConnections()
+
+
+   .. py:method:: OnDtaleBtnClicked()
+
+
+   .. py:method:: OnSaveDataBtClicked()
+
+
+   .. py:method:: OnOpenDataFileBtnClicked()
+
+
+   .. py:method:: PopulateTable()
+
+
+   .. py:method:: OnDataChanged()
+
+
+   .. py:method:: ReadData(filename)
+
+
+
